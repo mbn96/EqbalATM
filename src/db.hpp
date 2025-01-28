@@ -8,13 +8,15 @@ namespace EqbalAtm {
 struct Card {
 private:
   std::string id;
+  std::string password;
   std::string owner;
   int64_t balance;
 
 public:
   Card() = default;
-  Card(const std::string &p_id, const std::string &p_owner, int64_t p_balance)
-      : id{p_id}, owner{p_owner}, balance{p_balance} {}
+  Card(const std::string &p_id, const std::string &p_owner,
+       const std::string &p_password, int64_t p_balance)
+      : id{p_id}, password{p_password}, owner{p_owner}, balance{p_balance} {}
   Card(Card &&crd) = default;
   Card &operator=(Card &&name) = default;
   ~Card() = default;
@@ -36,6 +38,7 @@ public:
 
   const std::string &getID() const noexcept { return id; }
   const std::string &getOwner() const noexcept { return owner; }
+  const std::string &getPassword() const noexcept { return password; }
 };
 
 class DataBase {
