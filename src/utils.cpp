@@ -15,7 +15,6 @@ int64_t readInt() {
   return res;
 }
 
-void printLine(const std::string &l) { std::cout << l << std::endl; }
 
 void skipWhiteSpace() {
   static const std::string wps = "\n\t ";

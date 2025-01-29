@@ -11,11 +11,9 @@ class Atm {
 private:
   using InputVal = std::variant<std::string, int64_t>;
   enum class InputType { String, Integer };
-  // enum class AtmStage { Start, SelectAction, Withdraw, Deposit, Transfer };
 
   DataBase &db;
   Card *selectedCard;
-  // std::stack<std::pair<AtmStage, int32_t>> stageStack;
 
 public:
   Atm(DataBase &p_db) : db(p_db) {}
@@ -34,7 +32,7 @@ private:
   void deposit();
   void transfer();
   void getBalance();
-  InputVal readInput(const InputType t, bool &ok);
+  std::optional<InputVal> readInput(const InputType t);
   std::optional<Card *> readCard();
   bool confirm(const std::string &msg);
   void popStage();

@@ -15,10 +15,9 @@ void Atm::run() {
   }
 }
 
-Atm::InputVal Atm::readInput(const InputType t, bool &ok) {
-  printLine("(enter c to cancel)");
+std::optional<Atm::InputVal> Atm::readInput(const InputType t) {
+  std::cout << "(enter c to cancel)" << std::endl;
   skipWhiteSpace();
-  ok = true;
   switch (t) {
   case InputType::String: {
     std::string inp;
@@ -38,19 +37,17 @@ Atm::InputVal Atm::readInput(const InputType t, bool &ok) {
     return inp;
   }
   }
-  ok = false;
-  return 0;
+  return std::nullopt;
 }
 
 std::optional<Card *> Atm::readCard() {
-  bool ok = true;
-  auto inp = readInput(InputType::String, ok);
-  if (!ok) {
+  auto inp = readInput(InputType::String);
+  if (!inp) {
     return std::nullopt;
   }
-  auto cardID = std::get<std::string>(inp);
+  auto cardID = std::get<std::string>(inp.value());
   if (!db.cardExists(cardID)) {
-    printLine("Invalid Card ID.");
+    std::cout << "Invalid Card ID." << std::endl;
     return std::nullopt;
   }
   auto card = &db.getCard(cardID);
@@ -58,37 +55,37 @@ std::optional<Card *> Atm::readCard() {
 }
 
 void Atm::start() {
-  printLine("Welcome To EqbalATM, Please Enter Your Card ID:");
+  std::cout << "Welcome To EqbalATM, Please Enter Your Card ID:" << std::endl;
   auto cardOpt = readCard();
   if (cardOpt) {
     selectedCard = cardOpt.value();
     selectAction();
   }
-  printLine("Thank you. Goodbye!");
+  std::cout << "Thank you. Goodbye!" << std::endl;
   selectedCard = nullptr;
 }
 void Atm::printCardInfo(const Card &c) const {
-  printLine("\tCard ID:\t" + c.getID());
-  printLine("\tCard Owner:\t" + c.getOwner());
+  std::cout << "\tCard ID:\t" + c.getID() << std::endl;
+  std::cout << "\tCard Owner:\t" + c.getOwner() << std::endl;
 }
 
 void Atm::selectAction() {
-  printLine("Entered Card Info:");
+  std::cout << "Entered Card Info:" << std::endl;
   printCardInfo(*selectedCard);
-  printLine("Please Choose one of the following actions:\n"
-            "1) Withdraw Money\n"
-            "2) Deposit Money\n"
-            "3) Transfer Money\n"
-            "4) Get Current Balance");
+  std::cout << "Please Choose one of the following actions:\n"
+               "1) Withdraw Funds\n"
+               "2) Deposit Funds\n"
+               "3) Transfer Funds\n"
+               "4) Check Balance"
+            << std::endl;
   int64_t action = 0;
   while (action < 1 || action > 4) {
-    printLine("Enter a Number Between 1-4");
-    bool ok = false;
-    auto ans = readInput(InputType::Integer, ok);
-    if (!ok) {
+    std::cout << "Enter a Number Between 1-4" << std::endl;
+    auto ans = readInput(InputType::Integer);
+    if (!ans) {
       return;
     }
-    action = std::get<int64_t>(ans);
+    action = std::get<int64_t>(ans.value());
   }
 
   switch (action) {
@@ -112,152 +109,152 @@ void Atm::selectAction() {
 }
 
 bool Atm::confirm(const std::string &msg) {
-  printLine(msg);
-  printLine("Confirm? (y/n)");
+  std::cout << msg << std::endl;
+  std::cout << "Confirm? (y/n)" << std::endl;
   skipWhiteSpace();
   std::string ans;
   std::cin >> ans;
   return ans[0] == 'y';
 }
 void Atm::withdraw() {
-  printLine("Please Enter Withdraw Amount:");
+  std::cout << "Please Enter Withdraw Amount:" << std::endl;
   int64_t amount = 0;
-  bool ok;
-  InputVal ans;
+  std::optional<InputVal> ans;
   while (amount < 100 || amount > 100000) {
-    printLine("Enter a Number Between 100-100000");
-    ok = false;
-    ans = readInput(InputType::Integer, ok);
-    if (!ok) {
+    std::cout << "Enter a Number Between 100-100000" << std::endl;
+    ans = readInput(InputType::Integer);
+    if (!ans) {
       return;
     }
-    amount = std::get<int64_t>(ans);
+    amount = std::get<int64_t>(ans.value());
   }
-  printLine("Enter Card Password:");
-  ans = readInput(InputType::String, ok);
-  if (!ok) {
+  std::cout << "Enter Card Password:" << std::endl;
+  ans = readInput(InputType::String);
+  if (!ans) {
     return;
   }
-  std::string password = std::get<std::string>(ans);
+  std::string password = std::get<std::string>(ans.value());
   if (selectedCard->getPassword() != password) {
-    printLine("Incorrect Password.");
+    std::cout << "Incorrect Password." << std::endl;
     return;
   }
   std::stringstream st;
   st << "Withdraw " << amount << " ?";
+  bool ok;
   ok = confirm(st.str());
   if (ok && selectedCard->getBalance() >= amount) {
     selectedCard->withdraw(amount);
     st.str(std::string());
     st << "Current Balance: " << selectedCard->getBalance();
-    printLine(st.str());
+    std::cout << st.str() << std::endl;
     return;
   }
   if (ok) {
-    printLine("Insufficient Balance");
+    std::cout << "Insufficient Balance" << std::endl;
   }
 }
 void Atm::deposit() {
-  printLine("Please Enter Deposit Amount:");
+  std::cout << "Please Enter Deposit Amount:" << std::endl;
   int64_t amount = 0;
-  bool ok;
-  InputVal ans;
+  std::optional<InputVal> ans;
   while (amount < 100 || amount > 100000) {
-    printLine("Enter a Number Between 100-100000");
-    ok = false;
-    ans = readInput(InputType::Integer, ok);
-    if (!ok) {
+    std::cout << "Enter a Number Between 100-100000" << std::endl;
+    ans = readInput(InputType::Integer);
+    if (!ans) {
       return;
     }
-    amount = std::get<int64_t>(ans);
+    amount = std::get<int64_t>(ans.value());
   }
-  printLine("Enter Card Password:");
-  ans = readInput(InputType::String, ok);
-  if (!ok) {
+  std::cout << "Enter Card Password:" << std::endl;
+  ans = readInput(InputType::String);
+  if (!ans) {
     return;
   }
-  std::string password = std::get<std::string>(ans);
+  std::string password = std::get<std::string>(ans.value());
   if (selectedCard->getPassword() != password) {
-    printLine("Incorrect Password.");
+    std::cout << "Incorrect Password." << std::endl;
     return;
   }
   std::stringstream st;
   st << "Deposit " << amount << " ?";
+  bool ok;
   ok = confirm(st.str());
   if (ok) {
     selectedCard->deposit(amount);
     st.str(std::string());
     st << "Current Balance: " << selectedCard->getBalance();
-    printLine(st.str());
+    std::cout << st.str() << std::endl;
   }
 }
 void Atm::transfer() {
-  printLine("Please Enter Destination Card ID:");
+  std::cout << "Please Enter Destination Card ID:" << std::endl;
   auto cardOpt = readCard();
   if (!cardOpt) {
-    printLine("Invalid Destination Card.");
+    std::cout << "Invalid Destination Card." << std::endl;
     return;
   }
   auto destCard = cardOpt.value();
-  printLine("Please Enter Transfer Amount:");
-  int64_t amount = 0;
-  bool ok;
-  InputVal ans;
-  while (amount < 100 || amount > 100000) {
-    printLine("Enter a Number Between 100-100000");
-    ok = false;
-    ans = readInput(InputType::Integer, ok);
-    if (!ok) {
-      return;
-    }
-    amount = std::get<int64_t>(ans);
-  }
-  printLine("Enter Card Password:");
-  ans = readInput(InputType::String, ok);
-  if (!ok) {
+  if (destCard->getID() == selectedCard->getID()) {
+    std::cout << "Cannot Transfer funds To the same card." << std::endl;
     return;
   }
-  std::string password = std::get<std::string>(ans);
+  std::cout << "Please Enter Transfer Amount:" << std::endl;
+  int64_t amount = 0;
+  std::optional<InputVal> ans;
+  while (amount < 100 || amount > 100000) {
+    std::cout << "Enter a Number Between 100-100000" << std::endl;
+    ans = readInput(InputType::Integer);
+    if (!ans) {
+      return;
+    }
+    amount = std::get<int64_t>(ans.value());
+  }
+  std::cout << "Enter Card Password:" << std::endl;
+  ans = readInput(InputType::String);
+  if (!ans) {
+    return;
+  }
+  std::string password = std::get<std::string>(ans.value());
   if (selectedCard->getPassword() != password) {
-    printLine("Incorrect Password.");
+    std::cout << "Incorrect Password." << std::endl;
     return;
   }
   std::stringstream st;
   st << "Transfer " << amount << " From";
-  printLine(st.str());
+  std::cout << st.str() << std::endl;
   printCardInfo(*selectedCard);
-  printLine("To");
+  std::cout << "To" << std::endl;
   printCardInfo(*destCard);
+  bool ok;
   ok = confirm(std::string());
   if (ok && selectedCard->getBalance() >= amount) {
     selectedCard->withdraw(amount);
     destCard->deposit(amount);
     st.str(std::string());
     st << "Current Balance: " << selectedCard->getBalance();
-    printLine(st.str());
+    std::cout << st.str() << std::endl;
     return;
   }
   if (ok) {
-    printLine("Insufficient Balance");
+    std::cout << "Insufficient Balance" << std::endl;
   }
 }
 
 void Atm::getBalance() {
-  printLine("Enter Card Password:");
-  bool ok;
-  auto ans = readInput(InputType::String, ok);
-  if (!ok) {
+  std::cout << "Enter Card Password:" << std::endl;
+  auto ans = readInput(InputType::String);
+  if (!ans) {
     return;
   }
-  std::string password = std::get<std::string>(ans);
+  std::string password = std::get<std::string>(ans.value());
   if (selectedCard->getPassword() != password) {
-    printLine("Incorrect Password.");
+    std::cout << "Incorrect Password." << std::endl;
     return;
   }
 
   std::stringstream st;
   st << "Current Balance: " << selectedCard->getBalance();
-  printLine(st.str());
+  std::cout << st.str() << std::endl;
 }
 
 } // namespace EqbalAtm
