@@ -7,8 +7,10 @@ set(CMAKE_CXX_STANDDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 function(add_sanitizers target)
-  target_compile_options(${target} PRIVATE "-fsanitize=address,leak,undefined" -fno-omit-frame-pointer)
-  target_link_options(${target} PRIVATE "-fsanitize=address,leak,undefined")
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(${target} PRIVATE "-fsanitize=address,leak,undefined" -fno-omit-frame-pointer)
+    target_link_options(${target} PRIVATE "-fsanitize=address,leak,undefined")
+  endif()
 endfunction()
 
 function(add_compiler_warnings target)
